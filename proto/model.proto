@@ -1,0 +1,10 @@
+syntax = "proto3";
+package mfrs;
+
+message Model {
+    int32 ldim = 1;   // latent factor dimension
+    int32 nrow = 2;
+    int32 ncol = 3;
+    repeated float pvals = 4;  // nrow-by-ldim "p" matrix, row-major form
+    repeated float qvals = 5;  // ncol-by-ldim "q" matrix, row-major form
+}
