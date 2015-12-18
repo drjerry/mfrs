@@ -1,60 +1,96 @@
 package linalg
 
-import "testing"
-
-func TestFindCol(t *testing.T) {
-	fxt := new(CRSMatrix)
-	fxt.CInd = []int{1, 2, 4}
-
-	if res := fxt.findCol(0, 3, 1); res != 0 {
-		t.Errorf("findCol(..,1) => %d", res)
-	}
-	if res := fxt.findCol(0, 3, 2); res != 1 {
-		t.Errorf("findCol(..,2) => %d", res)
-	}
-	if res := fxt.findCol(0, 3, 4); res != 2 {
-		t.Errorf("findCol(..,4) => %d", res)
-	}
-	if res := fxt.findCol(0, 3, 3); res != -1 {
-		t.Errorf("findCol(..,3) => %d", res)
-	}
-}
+import (
+	"fmt"
+	"testing"
+)
 
 type entry struct {
-	i, j int
-	v    float32
+	row, col int
+	val      float32
 }
 
-func (e *entry) isEqual(i, j int, v float32) bool {
-	return (e.i == i && e.j == j && e.v == v)
+func (e entry) isEqual(row, col int, val float32) bool {
+	return (e.row == row && e.col == col && e.val == val)
 }
 
-func TestSmokeTestBuilderIter(t *testing.T) {
-	fxt := NewCRSMatrix(3, 3, 3)
+func intSliceTest(xs, ys []int) error {
+	if len(xs) != len(ys) {
+		return fmt.Errorf("length mismatch: %v != %v", xs, ys)
+	}
+	for i, x := range xs {
+		if x != ys[i] {
+			return fmt.Errorf("index %d: %v =! %v", i, xs, ys)
+		}
+	}
+	return nil
+}
+
+func floatSliceTest(xs, ys []float32) error {
+	if len(xs) != len(ys) {
+		return fmt.Errorf("length mismatch: %v != %v", xs, ys)
+	}
+	for i, x := range xs {
+		if x != ys[i] {
+			return fmt.Errorf("index %d: %v =! %v", i, xs, ys)
+		}
+	}
+	return nil
+}
+
+func TestSparseBuilder(t *testing.T) {
+	//	[0  1  2]
+	//	[0  0  0]
+	//	[3  0  0]
 	data := []entry{
-		entry{0, 1, float32(1)},
-		entry{0, 2, float32(2)},
-		entry{2, 0, float32(3)},
+		entry{0, 1, 1.0},
+		entry{0, 2, 2.0},
+		entry{2, 0, 3.0},
 	}
 
-	bdr := fxt.Builder()
-	for _, x := range data {
-		if err := bdr.Put(x.i, x.j, x.v); err != nil {
-			t.Errorf("%v => %s", x, err)
+	// expected Rptr and Cind values
+	rptr := []int{0, 2, 2, 3}
+	cind := []int{1, 2, 0}
+	vals := []float32{1, 2, 3}
+
+	sm := NewSparseMatrix(3, 3)
+	for _, e := range data {
+		if err := sm.Add(e.row, e.col, e.val); err != nil {
+			t.Errorf("build error => %v", err)
 		}
-	}
-	if err := bdr.Put(2, 1, float32(0)); err == nil {
-		t.Errorf("expected CSRBuilder.Put error state not met")
 	}
 
-	it := fxt.Iterator()
-	for _, x := range data {
-		i, j, v := it.Next()
-		if !x.isEqual(i, j, v) {
-			t.Error("%v != (%d, %d, %g)", x, i, j, v)
+	if err := intSliceTest(sm.rptr, rptr); err != nil {
+		t.Error(err)
+	}
+	if err := intSliceTest(sm.cind, cind); err != nil {
+		t.Error(err)
+	}
+	if err := floatSliceTest(sm.vals, vals); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSparseIterators(t *testing.T) {
+	sm := NewSparseMatrix(3, 3)
+	sm.rptr = []int{0, 2, 2, 3}
+	sm.cind = []int{1, 2, 0}
+	sm.vals = []float32{1, 2, 3}
+
+	expected := []entry{
+		entry{0, 1, 1.0},
+		entry{0, 2, 2.0},
+		entry{2, 0, 3.0},
+	}
+
+	iter := sm.Iterator()
+	for _, x := range expected {
+		row, col, val := iter.Next()
+		if !x.isEqual(row, col, val) {
+			t.Errorf("%v != (%d, %d, %g)", x, row, col, val)
 		}
 	}
-	if it.HasNext() {
-		t.Errorf("expected CSRIterator.Next end-state not met")
+	if iter.HasNext() {
+		t.Errorf("invalid SparseIterator end-state")
 	}
 }
