@@ -35,3 +35,16 @@ func TestRowView(t *testing.T) {
 		}
 	}
 }
+
+func TestVectorCopy(t *testing.T) {
+	ss, ds, ts := NewVector(2), NewVector(2), NewVector(2)
+	ts[0], ts[1] = 1, 2 // "truth" vector
+
+	ss[0], ss[1] = ts[0], ts[1]
+	ds.Copy(ss)
+	for i, v := range ds {
+		if ts[i] != v {
+			t.Errorf("Vector.Copy => %v != %v", ts, ds)
+		}
+	}
+}

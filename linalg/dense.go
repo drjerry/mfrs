@@ -30,3 +30,8 @@ func MatrixView(nrow, ncol int, values []float32) (Matrix, error) {
 func (m Matrix) RowView(i int, view *Vector) {
 	(*view) = m.vals[i*m.ncol : (i+1)*m.ncol]
 }
+
+// Copy moves the `src` vector into the underlying vector.
+func (v Vector) Copy(src Vector) {
+	copy(v, src)
+}
