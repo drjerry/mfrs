@@ -1,6 +1,9 @@
 package main
 
-import "github.com/drjerry/mfrs/linalg"
+import (
+	"github.com/drjerry/mfrs"
+	"github.com/drjerry/mfrs/linalg"
+)
 
 /* Stochastic-Gradient-Descent.
 
@@ -12,22 +15,19 @@ Arguments:
 Returns: Mean-squared-error, ie, mean of (r_{ij} - \hat{r}_{ij})^2 over all
 nonzero training examples r_{ij}.
 */
-func sgd(args *Args, r linalg.SparseMatrix, p, q linalg.Matrix) float32 {
+func sgd(args *Args, r mfrs.Ratings, p, q linalg.Matrix) float32 {
 	var u, v linalg.Vector
 	du := linalg.NewVector(args.Ldim)
 	dv := linalg.NewVector(args.Ldim)
 
-	iter := r.Iterator()
-	var mse, n float32
-	for iter.HasNext() {
-		i, j, val := iter.Next()
+	var mse float32
+	for n := 0; n < len(r); n++ {
 		// e_{ij} <- r_{ij} - p_i \dot q_j
-		p.RowView(i, &u)
-		q.RowView(j, &v)
-		e := val - linalg.Vdot(u, v)
-		// update mean online
-		n += 1.0
-		mse += (e*e - mse) / n
+		p.RowView(r[n].Row, &u)
+		q.RowView(r[n].Col, &v)
+		e := r[n].Val - linalg.Vdot(u, v)
+		// update MSE online
+		mse += (e*e - mse) / float32(n+1)
 		// dv <- e_{ij} * p_i - \lambda * q_j
 		dv.Copy(u)
 		linalg.Vscal(e, dv)

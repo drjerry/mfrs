@@ -40,7 +40,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	data := linalg.NewSparseMatrix(args.Nrow, args.Ncol)
+	var data mfrs.Ratings
 	scanner := mfrs.NewScanner(infile)
 	for scanner.Scan() {
 		row, col, val := scanner.Record()
