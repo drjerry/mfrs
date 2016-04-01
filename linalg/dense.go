@@ -1,7 +1,5 @@
 package linalg
 
-import "fmt"
-
 type Vector []float32
 
 // NewVector returns a vector allocated with the given size.
@@ -15,15 +13,12 @@ type Matrix struct {
 	vals       []float32
 }
 
-/* MatrixView wraps the `values` array in a row-major matrix representation.
-It raises an error if the declared nrow-by-ncol dimension of the matrix does
-not match the size of the underlying array.
-*/
-func MatrixView(nrow, ncol int, values []float32) (Matrix, error) {
+// MatrixView wraps the `values` array in a row-major matrix representation.
+func MatrixView(nrow, ncol int, values []float32) Matrix {
 	if nrow*ncol != len(values) {
-		return Matrix{}, fmt.Errorf("matrix shape %d,%d invalid", nrow, ncol)
+		panic("MatrixView: dimension mismatch")
 	}
-	return Matrix{nrow, ncol, values}, nil
+	return Matrix{nrow, ncol, values}
 }
 
 // RowView maps the provided Vector onto the i-th row.

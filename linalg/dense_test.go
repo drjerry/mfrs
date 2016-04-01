@@ -6,7 +6,7 @@ func TestMatrixView(t *testing.T) {
 	nrow, ncol := 2, 3
 	vals := make([]float32, 6)
 
-	m, _ := MatrixView(nrow, ncol, vals)
+	m := MatrixView(nrow, ncol, vals)
 	for i := 0; i < (m.nrow * m.ncol); i++ {
 		m.vals[i] = float32(i + 1)
 	}
@@ -23,7 +23,7 @@ func TestRowView(t *testing.T) {
 	vals := make([]float32, 6)
 	var vec Vector
 
-	m, _ := MatrixView(nrow, ncol, vals)
+	m := MatrixView(nrow, ncol, vals)
 	m.RowView(1, &vec)
 	for i := 0; i < len(vec); i++ {
 		vec[i] = float32(i + 1)
@@ -37,10 +37,10 @@ func TestRowView(t *testing.T) {
 }
 
 func TestVectorCopy(t *testing.T) {
-	ss, ds, ts := NewVector(2), NewVector(2), NewVector(2)
-	ts[0], ts[1] = 1, 2 // "truth" vector
+	ts := Vector([]float32{1, 2})  // "truth" vector
+	ss := Vector([]float32{1, 2})  // "source"
+	ds := NewVector(2)  // "dest"
 
-	ss[0], ss[1] = ts[0], ts[1]
 	ds.Copy(ss)
 	for i, v := range ds {
 		if ts[i] != v {

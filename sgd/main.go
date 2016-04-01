@@ -20,7 +20,7 @@ type Args struct {
 	Rate      float32
 	Lambda    float32
 	MaxIter   int
-    Seed      int64
+	Seed      int64
 }
 
 func main() {
@@ -50,8 +50,8 @@ func main() {
 		log.Fatal(scanner.Err())
 	}
 
-	p, _ := linalg.MatrixView(args.Nrow, args.Ldim, model.Pvals)
-	q, _ := linalg.MatrixView(args.Ncol, args.Ldim, model.Qvals)
+	p := linalg.MatrixView(args.Nrow, args.Ldim, model.Pvals)
+	q := linalg.MatrixView(args.Ncol, args.Ldim, model.Qvals)
 	for i := 0; i < args.MaxIter; i++ {
 		mse := sgd(args, data, p, q)
 		log.Printf("iter %d, RMSE %.6g\n", i, math.Sqrt(float64(mse)))
