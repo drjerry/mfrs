@@ -51,10 +51,10 @@ func (s Scanner) Record() (int, int, float32) {
 	return int(s.index[0]), int(s.index[1]), float32(s.value)
 }
 
-var nonword = regexp.MustCompile(`\W+`)
+var wspace = regexp.MustCompile(`\s+`)
 
 func (s *Scanner) readRecord() {
-	tokens := nonword.Split(s.scanner.Text(), 4)
+	tokens := wspace.Split(s.scanner.Text(), 4)
 	if len(tokens) < 2 {
 		s.err = fmt.Errorf("invalid record %s", s.scanner.Text())
 		return
