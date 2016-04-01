@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/drjerry/mfrs"
-	"github.com/drjerry/mfrs/linalg"
 	"log"
 	"math"
 	"math/rand"
@@ -50,10 +49,8 @@ func main() {
 		log.Fatal(scanner.Err())
 	}
 
-	p := linalg.MatrixView(args.Nrow, args.Ldim, model.Pvals)
-	q := linalg.MatrixView(args.Ncol, args.Ldim, model.Qvals)
 	for i := 0; i < args.MaxIter; i++ {
-		mse := sgd(args, data, p, q)
+		mse := sgd(args, data, &model)
 		log.Printf("iter %d, RMSE %.6g\n", i, math.Sqrt(float64(mse)))
 	}
 

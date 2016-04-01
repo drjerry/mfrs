@@ -8,17 +8,20 @@ import (
 /* Stochastic-Gradient-Descent.
 
 Arguments:
-  - args  config data containing hyper-parameters
-  - r     representation of ratings matrix
-  - p, q  matrices of parameters; updated on exit
+  - args   config data containing hyper-parameters
+  - r      representation of ratings matrix
+  - model  serialized data for model
 
-Returns: Mean-squared-error, ie, mean of (r_{ij} - \hat{r}_{ij})^2 over all
-nonzero training examples r_{ij}.
+Returns:
+  - Mean-Squared-Error
+  - updated members Pvals, Qvals of model.
 */
-func sgd(args *Args, r mfrs.Ratings, p, q linalg.Matrix) float32 {
+func sgd(args *Args, r mfrs.Ratings, model *mfrs.Model) float32 {
 	var u, v linalg.Vector
-	du := linalg.NewVector(args.Ldim)
-	dv := linalg.NewVector(args.Ldim)
+	p := linalg.MatrixView(int(model.Nrow), int(model.Ldim), model.Pvals)
+	q := linalg.MatrixView(int(model.Ncol), int(model.Ldim), model.Qvals)
+	du := linalg.NewVector(int(model.Ldim))
+	dv := linalg.NewVector(int(model.Ldim))
 
 	var mse float32
 	for n := 0; n < len(r); n++ {
