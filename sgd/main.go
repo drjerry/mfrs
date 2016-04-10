@@ -20,19 +20,20 @@ type Args struct {
 	Lambda    float32
 	MaxIter   int
 	Seed      int64
+	Sigma     float32
 }
 
 func main() {
+	log.SetFlags(log.Lmicroseconds)
 	args, err := parseArgs()
 	if err != nil {
+		flag.PrintDefaults()
 		log.Fatal(err)
 	}
 
 	model := mfrs.NewModel(args.Ldim, args.Nrow, args.Ncol)
 	rand.Seed(args.Seed)
-	randomize(model.Pvals)
-	randomize(model.Qvals)
-	log.Print("initialized model")
+	model.Randomize(args.Sigma)
 
 	infile, err := os.Open(args.Infile)
 	if err != nil {
@@ -48,10 +49,11 @@ func main() {
 	if scanner.Err() != nil {
 		log.Fatal(scanner.Err())
 	}
+	log.Printf("loaded %s", infile.Name())
 
-	for i := 0; i < args.MaxIter; i++ {
+	for iter := 1; iter <= args.MaxIter; iter++ {
 		mse := sgd(args, data, &model)
-		log.Printf("iter %d, RMSE %.6g\n", i, math.Sqrt(float64(mse)))
+		log.Printf("iter %d, RMSE %.6g\n", iter, math.Sqrt(float64(mse)))
 	}
 
 	mfrs.SaveModel(&model, args.ModelFile)
@@ -68,6 +70,7 @@ func parseArgs() (*Args, error) {
 	flag.Int64Var(&args.Seed, "seed", 2908, "RNG seed")
 	rate := flag.Float64("rate", 1e-2, "learning rate")
 	lambda := flag.Float64("lambda", 1e-3, "regularization parameter")
+	sigma := flag.Float64("sigma", 0.7e-1, "std dev for initial weights")
 	flag.Parse()
 
 	required := []string{"ldim", "nrow", "ncol", "in", "fit"}
@@ -80,11 +83,6 @@ func parseArgs() (*Args, error) {
 
 	args.Rate = float32(*rate)
 	args.Lambda = float32(*lambda)
+	args.Sigma = float32(*sigma)
 	return args, nil
-}
-
-func randomize(xs []float32) {
-	for i := 0; i < len(xs); i++ {
-		xs[i] = rand.Float32()
-	}
 }

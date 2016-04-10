@@ -5,13 +5,14 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"math/rand"
 )
 
 // NewModel returns an allocated Model with specified dimensions.
 func NewModel(ldim, nrow, ncol int) Model {
 	return Model{
-		int32(ldim), 
-		int32(nrow), 
+		int32(ldim),
+		int32(nrow),
 		int32(ncol),
 		make([]float32, nrow * ldim),
 		make([]float32, ncol * ldim),
@@ -59,4 +60,17 @@ func LoadModel(filename string) (*Model, error) {
 		return nil, err
 	}
 	return model, nil
+}
+
+// Randomize initializes the weights as IID Gaussian with specified std dev.
+func (model *Model) Randomize(sigma float32) {
+	randomize(sigma, model.Pvals)
+	randomize(sigma, model.Qvals)
+	log.Print("randomized weights")
+}
+
+func randomize(sigma float32, xs []float32) {
+	for i := 0; i < len(xs); i++ {
+		xs[i] = float32(rand.NormFloat64()) * sigma
+	}
 }
