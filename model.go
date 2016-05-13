@@ -4,8 +4,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	"io/ioutil"
 	"log"
-	"os"
 	"math/rand"
+	"os"
 )
 
 // NewModel returns an allocated Model with specified dimensions.
@@ -14,12 +14,14 @@ func NewModel(ldim, nrow, ncol int) Model {
 		int32(ldim),
 		int32(nrow),
 		int32(ncol),
-		make([]float32, nrow * ldim),
-		make([]float32, ncol * ldim),
+		make([]float32, nrow*ldim),
+		make([]float32, ncol*ldim),
+		make([]float32, nrow),
+		make([]float32, ncol),
 	}
 }
 
-// SaveModel writes the Model to the specified file.
+// SaveModel serializes the Model to the specified file.
 func SaveModel(model *Model, filename string) error {
 	data, err := proto.Marshal(model)
 	if err != nil {
@@ -40,7 +42,7 @@ func SaveModel(model *Model, filename string) error {
 	return nil
 }
 
-// LoadModel deserialized a Model from the specified file.
+// LoadModel deserializes a Model from the specified file.
 func LoadModel(filename string) (*Model, error) {
 	reader, err := os.Open(filename)
 	if err != nil {
@@ -66,6 +68,8 @@ func LoadModel(filename string) (*Model, error) {
 func (model *Model) Randomize(sigma float32) {
 	randomize(sigma, model.Pvals)
 	randomize(sigma, model.Qvals)
+	randomize(sigma, model.Pbias)
+	randomize(sigma, model.Qbias)
 	log.Print("randomized weights")
 }
 

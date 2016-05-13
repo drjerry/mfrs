@@ -23,6 +23,8 @@ func TestModelSerialization(t *testing.T) {
 	src := NewModel(1, 2, 3)
 	src.Pvals = []float32{1, 2}
 	src.Qvals = []float32{1, 2, 3}
+	src.Pbias = []float32{1.5, 2.5}
+	src.Qbias = []float32{1.5, 2.5, 3.5}
 
 	if err := SaveModel(&src, testName); err != nil {
 		t.Error(err)
