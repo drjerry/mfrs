@@ -7,4 +7,6 @@ message Model {
     int32 ncol = 3;
     repeated float pvals = 4;  // nrow-by-ldim "p" matrix, row-major form
     repeated float qvals = 5;  // ncol-by-ldim "q" matrix, row-major form
+    repeated float pbias = 6;  // vector of "row" bias terms
+    repeated float qbias = 7;  // vector of "col" bias terms
 }
