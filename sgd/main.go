@@ -40,19 +40,32 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var data mfrs.Ratings
 	scanner := mfrs.NewScanner(infile)
+	solver := NewSGDSolver(&model, args)
+
+	var count int
+	var mse float32
+	var data mfrs.Ratings
+	log.Printf("reading %s", infile.Name())
 	for scanner.Scan() {
 		row, col, val := scanner.Record()
 		data.Add(row, col, val)
+		delta := solver.Update(row, col, val)
+		count++
+		mse += (delta - mse) / float32(count)
 	}
 	if scanner.Err() != nil {
 		log.Fatal(scanner.Err())
 	}
-	log.Printf("loaded %s", infile.Name())
 
-	for iter := 1; iter <= args.MaxIter; iter++ {
-		mse := sgd(args, data, &model)
+	log.Printf("iter 1, RMSE %.6g\n", math.Sqrt(float64(mse)))
+
+	for iter := 2; iter <= args.MaxIter; iter++ {
+		mse = 0
+		for n := 0; n < len(data); n++ {
+			delta := solver.Update(data[n].Row, data[n].Col, data[n].Val)
+			mse += (delta - mse) / float32(n+1)
+		}
 		log.Printf("iter %d, RMSE %.6g\n", iter, math.Sqrt(float64(mse)))
 	}
 
