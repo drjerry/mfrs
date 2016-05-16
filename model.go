@@ -1,6 +1,7 @@
 package mfrs
 
 import (
+	"github.com/drjerry/mfrs/linalg"
 	"github.com/golang/protobuf/proto"
 	"io/ioutil"
 	"log"
@@ -73,6 +74,16 @@ func (model *Model) Initialize(bias, sigma float32) {
 	randomize(sigma, model.Qvals)
 	assign(sigma, model.Pbias)
 	assign(sigma, model.Qbias)
+}
+
+// Predict evaluates the model for the predicted rating at <row, col>.
+func (model *Model) Predict(row, col int) float32 {
+	stride := int(model.Ldim)
+	pOffset := row * stride
+	qOffset := col * stride
+	pRow := linalg.Vector(model.Pvals[pOffset: pOffset+stride])
+	qRow := linalg.Vector(model.Qvals[qOffset: qOffset+stride])
+	return model.Pbias[row] + model.Qbias[col] + linalg.Vdot(pRow, qRow)
 }
 
 func randomize(sigma float32, xs []float32) {
