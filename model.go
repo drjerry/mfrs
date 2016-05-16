@@ -64,17 +64,25 @@ func LoadModel(filename string) (*Model, error) {
 	return model, nil
 }
 
-// Randomize initializes the weights as IID Gaussian with specified std dev.
-func (model *Model) Randomize(sigma float32) {
+// Initialize sets the initial weights for the model using:
+// (1) constant `bias` value for the bias vectors,
+// (2) randomized weight vectors, Normal dist with std deviation `sigma`.
+func (model *Model) Initialize(bias, sigma float32) {
+	log.Print("initializing model")
 	randomize(sigma, model.Pvals)
 	randomize(sigma, model.Qvals)
-	randomize(sigma, model.Pbias)
-	randomize(sigma, model.Qbias)
-	log.Print("randomized weights")
+	assign(sigma, model.Pbias)
+	assign(sigma, model.Qbias)
 }
 
 func randomize(sigma float32, xs []float32) {
 	for i := 0; i < len(xs); i++ {
 		xs[i] = float32(rand.NormFloat64()) * sigma
+	}
+}
+
+func assign(bias float32, xs []float32) {
+	for i := 0; i < len(xs); i++ {
+		xs[i] = bias
 	}
 }

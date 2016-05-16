@@ -21,6 +21,7 @@ type Args struct {
 	MaxIter   int
 	Seed      int64
 	Sigma     float32
+	Bias      float32
 }
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
 
 	model := mfrs.NewModel(args.Ldim, args.Nrow, args.Ncol)
 	rand.Seed(args.Seed)
-	model.Randomize(args.Sigma)
+	model.Initialize(args.Sigma)
 
 	infile, err := os.Open(args.Infile)
 	if err != nil {
@@ -84,6 +85,7 @@ func parseArgs() (*Args, error) {
 	rate := flag.Float64("rate", 1e-2, "learning rate")
 	lambda := flag.Float64("lambda", 1e-3, "regularization parameter")
 	sigma := flag.Float64("sigma", 0.7e-1, "std dev for initial weights")
+	bias := flag.Float64("bias", 0.5, "initial bias values")
 	flag.Parse()
 
 	required := []string{"ldim", "nrow", "ncol", "in", "fit"}
@@ -97,5 +99,6 @@ func parseArgs() (*Args, error) {
 	args.Rate = float32(*rate)
 	args.Lambda = float32(*lambda)
 	args.Sigma = float32(*sigma)
+	args.Bias  = float32(*bias)
 	return args, nil
 }
