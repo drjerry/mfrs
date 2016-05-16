@@ -21,8 +21,8 @@ func floatArrayEqual(xs, ys []float32) error {
 func TestModelSerialization(t *testing.T) {
 	testName := "/tmp/model.test"
 	src := NewModel(1, 2, 3)
-	src.Pvals = []float32{1, 2}
-	src.Qvals = []float32{1, 2, 3}
+	src.Pwts = []float32{1, 2}
+	src.Qwts = []float32{1, 2, 3}
 	src.Pbias = []float32{1.5, 2.5}
 	src.Qbias = []float32{1.5, 2.5, 3.5}
 
@@ -36,11 +36,11 @@ func TestModelSerialization(t *testing.T) {
 	}
 	os.Remove(testName)
 
-	if err = floatArrayEqual(src.Pvals, dest.Pvals); err != nil {
+	if err = floatArrayEqual(src.Pwts, dest.Pwts); err != nil {
 		t.Error(err)
 	}
 
-	if err = floatArrayEqual(src.Qvals, dest.Qvals); err != nil {
+	if err = floatArrayEqual(src.Qwts, dest.Qwts); err != nil {
 		t.Error(err)
 	}
 }

@@ -70,8 +70,8 @@ func LoadModel(filename string) (*Model, error) {
 // (2) randomized weight vectors, Normal dist with std deviation `sigma`.
 func (model *Model) Initialize(bias, sigma float32) {
 	log.Print("initializing model")
-	randomize(sigma, model.Pvals)
-	randomize(sigma, model.Qvals)
+	randomize(sigma, model.Pwts)
+	randomize(sigma, model.Qwts)
 	assign(sigma, model.Pbias)
 	assign(sigma, model.Qbias)
 }
@@ -81,8 +81,8 @@ func (model *Model) Predict(row, col int) float32 {
 	stride := int(model.Ldim)
 	pOffset := row * stride
 	qOffset := col * stride
-	pRow := linalg.Vector(model.Pvals[pOffset: pOffset+stride])
-	qRow := linalg.Vector(model.Qvals[qOffset: qOffset+stride])
+	pRow := linalg.Vector(model.Pwts[pOffset : pOffset+stride])
+	qRow := linalg.Vector(model.Qwts[qOffset : qOffset+stride])
 	return model.Pbias[row] + model.Qbias[col] + linalg.Vdot(pRow, qRow)
 }
 
