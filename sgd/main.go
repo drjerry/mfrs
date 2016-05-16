@@ -18,6 +18,7 @@ type Args struct {
 	ModelFile string
 	Rate      float32
 	Lambda    float32
+	Mu        float32
 	MaxIter   int
 	Seed      int64
 	Sigma     float32
@@ -34,7 +35,7 @@ func main() {
 
 	model := mfrs.NewModel(args.Ldim, args.Nrow, args.Ncol)
 	rand.Seed(args.Seed)
-	model.Initialize(args.Sigma)
+	model.Initialize(args.Bias, args.Sigma)
 
 	infile, err := os.Open(args.Infile)
 	if err != nil {
@@ -83,7 +84,8 @@ func parseArgs() (*Args, error) {
 	flag.IntVar(&args.MaxIter, "epochs", 10, "maximum iteration count")
 	flag.Int64Var(&args.Seed, "seed", 2908, "RNG seed")
 	rate := flag.Float64("rate", 1e-2, "learning rate")
-	lambda := flag.Float64("lambda", 1e-3, "regularization parameter")
+	lambda := flag.Float64("lambda", 1e-3, "regularization param for row weights")
+	mu := flag.Float64("mu", 1e-3, "regularization param for column weights")
 	sigma := flag.Float64("sigma", 0.7e-1, "std dev for initial weights")
 	bias := flag.Float64("bias", 0.5, "initial bias values")
 	flag.Parse()
@@ -98,7 +100,8 @@ func parseArgs() (*Args, error) {
 
 	args.Rate = float32(*rate)
 	args.Lambda = float32(*lambda)
+	args.Mu = float32(*mu)
 	args.Sigma = float32(*sigma)
-	args.Bias  = float32(*bias)
+	args.Bias = float32(*bias)
 	return args, nil
 }

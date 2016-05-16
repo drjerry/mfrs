@@ -11,7 +11,7 @@ import (
 type SGDSolver struct {
 	pbias, qbias         linalg.Vector
 	pwts, qwts           linalg.Matrix
-	rate, lambda         float32
+	rate, lambda, mu     float32
 	dp_i, dq_j, p_i, q_j linalg.Vector
 }
 
@@ -24,6 +24,7 @@ func NewSGDSolver(model *mfrs.Model, args *Args) *SGDSolver {
 		qwts:   linalg.MatrixView(int(model.Ncol), int(model.Ldim), model.Qwts),
 		rate:   args.Rate,
 		lambda: args.Lambda,
+		mu:     args.Mu,
 		dp_i:   linalg.NewVector(int(model.Ldim)),
 		dq_j:   linalg.NewVector(int(model.Ldim)),
 	}
