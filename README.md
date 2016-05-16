@@ -9,7 +9,7 @@ This minimal implementation supports the following features:
      training data from a file, performs Stochastic Gradient Descent (for
       a specified number of epochs) and writes the model to a file.
 
-  1. Raw data is read in text format, where each record is a triple `<i,j, r>`
+  1. Raw data is read in text format, where each record is a triple `<i,j,r>`
      that represents the entry `r[i,j]` of a "ratings" matrix.  
 
   3. A fitted model is represented as a
@@ -27,33 +27,47 @@ that the ratings matrix has dimension M-by-N and is sparse. We use bracket
 notation (a la numpy) instead of subscripts. For a L-dimensional latent
 factor model, the predicted ratings are given by:
 
-    h[i,j] = a[i] + b[j] + p[i,:] * q[j,:]
+    h[i,j] = Pbias[i] + Qbias[j] + Pwts[i,:] * Qwts[j,:]
 
-where `a` and `b` are column vectors of bias terms of dimensions M and N
-respectively, `p` is an M-by-L matrix of latent factors, `q` an N-by-L matrix
-of latent factors, and `p[i,:] * q[j,:]` is the inner product between the
-i-th row of `p` and j-th row of `q`.
+The names correspond to fields in the [model definition](model.pb.go).
+In particular, `Pwts` is an M-by-L matrix, `Qwts` an N-by-L matrix, and
+`Pwts[i,:] * Qwts[j,:]` is the Euclidean product of their i-th and j-th rows.
+The `Pbias` and `Qbias` terms are vectors of dimension M and N respectively.
 
 
 ## Stochastic gradient descent
 
-Model fitting minimizes the regularized loss function
+The loss function for a single training example `<i,j>` is given by
 
-    L = sum{ (r[i,j] - h[i,j])^2 + lambda * l2(p[i,:]) + mu * l2(q[j:]) }
+    E = ((h[i,j] - r[i,j])^2 - lambda * l2(Pwts[i,:])^2 + mu * l2(Qwts[j,:])^2) / 2.
 
-where the sum ranges over all pairs (i,j) in the support of the training data,
-and where `lambda` and `mu` are regularization parameters for the factors.
+Where `l2()` denotes L2-norm of a vector. Note that regularization is applied
+only to the `Pwts` and `Qwts` terms, not the bias terms. From this loss function,
+the "delta" to update the terms `Pbias[i]`, `Qbias[j]`, `Pwts[i,:]`, `Qwts[j,:]`
+is computed and applied at each step.
 
-For each training example `r[i,j]`, define the error term by
+The package github.com/drjerry/mfrs/sgd is a command-line interface for
+applying SGD to a file of training data. It loads all training data into
+memory and performs SGD over the entire set for a specified number of "epochs."
+The arguments it takes are:
 
-    delta = h[i,j] - r[i,j]
+  - nrow, ncol, ldim: specify the dimensions M, N, and L in advance
+  - lambda, mu: the regularization parameters in the loss function
+  - learning "rate": rescales the delta (for each term) in the SGD update
+  - epochs: number of times to repeat SGD through the entire data set
 
-where `h[i,j]` on the right hand side is evaluated from the current state of
-parameters. The SGD update for this single example is
 
-    a[i]   -= rho * delta
-    b[j]   -= rho * delta
-    p[i,:] -= rho * (delta * q[j,:] + lambda * p[i,:])
-    q[j,:] -= rho * (delta * p[i,:] + mu * q[j,:])
+## Building
 
-where `rho` is the learning rate, an algorithmic hyperparameter.
+The package includes its own minimal set of wrappers around
+[CBLAS](http://www.netlib.org/blas/#_cblas) methods, and this library needs
+to be present on the target architecture. Installing the package requires
+compiler and linker flags to be passed via [CGO](https://golang.org/cmd/cgo/)
+environment variables. If your GOPATH is set up and CBLAS is installed in a
+standard location, the following should just work:
+
+    $ CGO_LDFLAGS=-lcblas go install github.com/drjerry/mfrs/sgd
+    $ CGO_LDFLAGS=-lcblas go install github.com/drjerry/mfrs/eval
+
+If CBLAS is installed in a non-standard location, the "-L" and "-I" flags
+may need to be passed as well.
