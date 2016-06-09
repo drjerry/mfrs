@@ -46,7 +46,7 @@ only to the `Pwts` and `Qwts` terms, not the bias terms. From this loss function
 the "delta" to update the terms `Pbias[i]`, `Qbias[j]`, `Pwts[i,:]`, `Qwts[j,:]`
 is computed and applied at each step.
 
-The package github.com/drjerry/mfrs/sgd is a command-line interface for
+The package github.com/drjerry/mfrs/mfsgd is a command-line interface for
 applying SGD to a file of training data. It loads all training data into
 memory and performs SGD over the entire set for a specified number of "epochs."
 The arguments it takes are:
@@ -66,8 +66,8 @@ compiler and linker flags to be passed via [CGO](https://golang.org/cmd/cgo/)
 environment variables. If your GOPATH is set up and CBLAS is installed in a
 standard location, the following should just work:
 
-    $ CGO_LDFLAGS=-lcblas go install github.com/drjerry/mfrs/sgd
-    $ CGO_LDFLAGS=-lcblas go install github.com/drjerry/mfrs/eval
+    $ CGO_LDFLAGS=-lcblas go install github.com/drjerry/mfrs/mfsgd
+    $ CGO_LDFLAGS=-lcblas go install github.com/drjerry/mfrs/mfeval
 
 If CBLAS is installed in a non-standard location, the "-L" and "-I" flags
 may need to be passed as well.
