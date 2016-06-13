@@ -67,6 +67,9 @@ func main() {
 		for n := 0; n < len(data); n++ {
 			delta := solver.Update(data[n].Row, data[n].Col, data[n].Val)
 			mse += (delta - mse) / float32(n+1)
+			if math.IsNaN(float64(mse)) {
+				log.Fatal("SGD overflow")
+			}
 		}
 		log.Printf("iter %d, RMSE %.6g\n", iter, math.Sqrt(float64(mse)))
 	}
