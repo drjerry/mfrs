@@ -43,7 +43,7 @@ func (s *SGDSolver) Update(i, j int, r_ij float32) float32 {
 	// dp_i <- e_{ij} * q_j + lambda * p_i
 	s.dp_i.Copy(s.q_j)
 	linalg.Vscal(e_ij, s.dp_i)
-	linalg.Vaxpy(s.lambda, s.p_i, s.dp_i)
+	linalg.Vaxpy(s.mu, s.p_i, s.dp_i)
 	// apply gradient
 	s.pbias[i] -= s.rate * e_ij
 	s.qbias[j] -= s.rate * e_ij
